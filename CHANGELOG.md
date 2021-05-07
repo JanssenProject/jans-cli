@@ -1,5 +1,13 @@
 # Changelog
 
+### [0.1.2](https://www.github.com/JanssenProject/jans-cli/compare/v0.1.1...v0.1.2) (2021-05-07)
+
+
+### Bug Fixes
+
+* **jca-client:** re-update cleint ([9f3e52c](https://www.github.com/JanssenProject/jans-cli/commit/9f3e52c00ae690be4125f13823fb92ca7438d6f9))
+* **jca-client:** update cleint ([abfe925](https://www.github.com/JanssenProject/jans-cli/commit/abfe925e7b85a01599b84e8254946128a9c39129))
+
 ### [0.1.1](https://www.github.com/JanssenProject/jans-cli/compare/v0.1.0...v0.1.1) (2021-05-07)
 
 
