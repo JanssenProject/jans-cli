@@ -1,5 +1,18 @@
 # Changelog
 
+### [0.2.1](https://www.github.com/JanssenProject/jans-cli/compare/v0.2.0...v0.2.1) (2021-07-14)
+
+
+### Bug Fixes
+
+* update jca swagger client ([d942e73](https://www.github.com/JanssenProject/jans-cli/commit/d942e73378168e984406faca7cc5ac5f7632dcee))
+
+
+### Documentation
+
+* **cli-couchbase:** edited new operations ([7b2ed0e](https://www.github.com/JanssenProject/jans-cli/commit/7b2ed0e331f162aa2181fdf7ecef378483808024))
+* **im-jwk:** edited operations ([452c47f](https://www.github.com/JanssenProject/jans-cli/commit/452c47f749ba34c86f0205494f231807ea8e9977))
+
 ## [0.2.0](https://www.github.com/JanssenProject/jans-cli/compare/v0.1.1...v0.2.0) (2021-07-08)
 
 
