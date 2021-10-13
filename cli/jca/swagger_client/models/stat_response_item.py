@@ -28,24 +28,50 @@ class StatResponseItem(object):
                             and the value is json key in definition.
     """
     swagger_types = {
+        'month': 'int',
         'monthly_active_users': 'int',
-        'token_count_per_grant_type': 'dict(str, DataMapObject)'
+        'token_count_per_granttype': 'dict(str, TokenMapObject)'
     }
 
     attribute_map = {
-        'monthly_active_users': 'monthlyActiveUsers',
-        'token_count_per_grant_type': 'tokenCountPerGrantType'
+        'month': 'month',
+        'monthly_active_users': 'monthly_active_users',
+        'token_count_per_granttype': 'token_count_per_granttype'
     }
 
-    def __init__(self, monthly_active_users=0, token_count_per_grant_type=None):  # noqa: E501
+    def __init__(self, month=None, monthly_active_users=0, token_count_per_granttype=None):  # noqa: E501
         """StatResponseItem - a model defined in Swagger"""  # noqa: E501
+        self._month = None
         self._monthly_active_users = None
-        self._token_count_per_grant_type = None
+        self._token_count_per_granttype = None
         self.discriminator = None
+        if month is not None:
+            self.month = month
         if monthly_active_users is not None:
             self.monthly_active_users = monthly_active_users
-        if token_count_per_grant_type is not None:
-            self.token_count_per_grant_type = token_count_per_grant_type
+        if token_count_per_granttype is not None:
+            self.token_count_per_granttype = token_count_per_granttype
+
+    @property
+    def month(self):
+        """Gets the month of this StatResponseItem.  # noqa: E501
+
+
+        :return: The month of this StatResponseItem.  # noqa: E501
+        :rtype: int
+        """
+        return self._month
+
+    @month.setter
+    def month(self, month):
+        """Sets the month of this StatResponseItem.
+
+
+        :param month: The month of this StatResponseItem.  # noqa: E501
+        :type: int
+        """
+
+        self._month = month
 
     @property
     def monthly_active_users(self):
@@ -71,25 +97,25 @@ class StatResponseItem(object):
         self._monthly_active_users = monthly_active_users
 
     @property
-    def token_count_per_grant_type(self):
-        """Gets the token_count_per_grant_type of this StatResponseItem.  # noqa: E501
+    def token_count_per_granttype(self):
+        """Gets the token_count_per_granttype of this StatResponseItem.  # noqa: E501
 
 
-        :return: The token_count_per_grant_type of this StatResponseItem.  # noqa: E501
-        :rtype: dict(str, DataMapObject)
+        :return: The token_count_per_granttype of this StatResponseItem.  # noqa: E501
+        :rtype: dict(str, TokenMapObject)
         """
-        return self._token_count_per_grant_type
+        return self._token_count_per_granttype
 
-    @token_count_per_grant_type.setter
-    def token_count_per_grant_type(self, token_count_per_grant_type):
-        """Sets the token_count_per_grant_type of this StatResponseItem.
+    @token_count_per_granttype.setter
+    def token_count_per_granttype(self, token_count_per_granttype):
+        """Sets the token_count_per_granttype of this StatResponseItem.
 
 
-        :param token_count_per_grant_type: The token_count_per_grant_type of this StatResponseItem.  # noqa: E501
-        :type: dict(str, DataMapObject)
+        :param token_count_per_granttype: The token_count_per_granttype of this StatResponseItem.  # noqa: E501
+        :type: dict(str, TokenMapObject)
         """
 
-        self._token_count_per_grant_type = token_count_per_grant_type
+        self._token_count_per_granttype = token_count_per_granttype
 
     def to_dict(self):
         """Returns the model properties as a dict"""

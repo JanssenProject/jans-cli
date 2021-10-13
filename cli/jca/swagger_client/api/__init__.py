@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 # import apis into api package
 from swagger_client.api.attribute_api import AttributeApi
+from swagger_client.api.auth_server_health___check_api import AuthServerHealthCheckApi
 from swagger_client.api.cache_configuration_api import CacheConfigurationApi
 from swagger_client.api.cache_configuration__memcached_api import CacheConfigurationMemcachedApi
 from swagger_client.api.cache_configuration__native_persistence_api import CacheConfigurationNativePersistenceApi
@@ -23,4 +24,5 @@ from swagger_client.api.health___check_api import HealthCheckApi
 from swagger_client.api.o_auth___open_id_connect___clients_api import OAuthOpenIDConnectClientsApi
 from swagger_client.api.o_auth___scopes_api import OAuthScopesApi
 from swagger_client.api.o_auth___uma_resources_api import OAuthUMAResourcesApi
+from swagger_client.api.scim___user_management_api import SCIMUserManagementApi
 from swagger_client.api.statistics___user_api import StatisticsUserApi
