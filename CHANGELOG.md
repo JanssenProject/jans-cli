@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://www.github.com/JanssenProject/jans-cli/compare/v0.3.0...v0.4.0) (2021-11-10)
+
+
+### Features
+
+* eep swagger client on seperate server (ref: [#57](https://www.github.com/JanssenProject/jans-cli/issues/57)) ([35e6369](https://www.github.com/JanssenProject/jans-cli/commit/35e636928af163b3f8fb2191e6c9a1927c0dab15))
+
 ## [0.3.0](https://www.github.com/JanssenProject/jans-cli/compare/v0.2.0...v0.3.0) (2021-09-10)
 
 
