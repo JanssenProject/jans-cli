@@ -1292,7 +1292,13 @@ class JCA_CLI:
                 elif selection in item_numbers:
                     item = attr_name_list[int(selection) - 1]
                     item_unmapped = self.get_model_key_map(cur_model, item)
-                    schema_item = schema['properties'][item]
+
+                    if schema.get('properties',{}).get('keys', {}).get('properties', {}).get(item):
+                        schema_item = schema['properties']['keys']['properties'][item]
+                        schema = schema['properties']['keys']
+                    else:
+                        schema_item = schema['properties'][item]
+
                     schema_item['__name__'] = item
                     self.get_input_for_schema_(schema, cur_model, initialised=initialised, getitem=schema_item)
                     changed_items.append(item)
