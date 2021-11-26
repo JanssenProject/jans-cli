@@ -6,6 +6,7 @@ import json
 import re
 import urllib3
 import configparser
+import readline
 import argparse
 import inspect
 import random
