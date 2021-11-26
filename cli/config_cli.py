@@ -1024,59 +1024,65 @@ class JCA_CLI:
     def process_post(self, endpoint):
         schema = self.get_scheme_for_endpoint(endpoint)
 
-        title = schema.get('description') or schema['title']
-        data_dict = {}
+        if schema:
 
-        model_class = getattr(swagger_client.models, schema['__schema_name__'])
+            title = schema.get('description') or schema['title']
+            data_dict = {}
 
-        if my_op_mode == 'scim':
-            if endpoint.path == '/jans-scim/restv1/v2/Groups':
-                schema['properties']['schemas']['default'] = ['urn:ietf:params:scim:schemas:core:2.0:Group']
-            elif endpoint.path == '/jans-scim/restv1/v2/Users':
-                schema['properties']['schemas']['default'] = ['urn:ietf:params:scim:schemas:core:2.0:User']
-            if endpoint.info['operationId'] == 'create-user':
-                schema['required'] = ['userName', 'name', 'displayName', 'emails', 'password']
+            model_class = getattr(swagger_client.models, schema['__schema_name__'])
 
-        model = self.get_input_for_schema_(schema, model_class, required_only=True)
+            if my_op_mode == 'scim':
+                if endpoint.path == '/jans-scim/restv1/v2/Groups':
+                    schema['properties']['schemas']['default'] = ['urn:ietf:params:scim:schemas:core:2.0:Group']
+                elif endpoint.path == '/jans-scim/restv1/v2/Users':
+                    schema['properties']['schemas']['default'] = ['urn:ietf:params:scim:schemas:core:2.0:User']
+                if endpoint.info['operationId'] == 'create-user':
+                    schema['required'] = ['userName', 'name', 'displayName', 'emails', 'password']
 
-        optional_fields = []
-        required_fields = schema.get('required', []) + ['dn', 'inum']
-        for field in schema['properties']:
-            if not field in required_fields:
-                optional_fields.append(field)
+            model = self.get_input_for_schema_(schema, model_class, required_only=True)
 
-        if optional_fields:
-            fill_optional = self.get_input(values=['y', 'n'], text='Populate optional fields?')
-            fields_numbers = []
-            if fill_optional == 'y':
-                print("Optiaonal Fields:")
-                for i, field in enumerate(optional_fields):
-                    print(i + 1, field)
-                    fields_numbers.append(str(i + 1))
+            optional_fields = []
+            required_fields = schema.get('required', []) + ['dn', 'inum']
+            for field in schema['properties']:
+                if not field in required_fields:
+                    optional_fields.append(field)
 
-                while True:
-                    optional_selection = self.get_input(values=['q', 'c'] + fields_numbers,
-                                                        help_text="c: continue, #: populate field")
-                    if optional_selection == 'c':
-                        break
-                    if optional_selection in fields_numbers:
-                        item_name = optional_fields[int(optional_selection) - 1]
-                        schema_item = schema['properties'][item_name].copy()
-                        schema_item['__name__'] = item_name
-                        self.get_input_for_schema_(schema, model, initialised=True, getitem=schema_item)
+            if optional_fields:
+                fill_optional = self.get_input(values=['y', 'n'], text='Populate optional fields?')
+                fields_numbers = []
+                if fill_optional == 'y':
+                    print("Optiaonal Fields:")
+                    for i, field in enumerate(optional_fields):
+                        print(i + 1, field)
+                        fields_numbers.append(str(i + 1))
 
-        print("Obtained Data:\n")
-        model_unmapped = self.unmap_model(model)
-        self.print_colored_output(model_unmapped)
+                    while True:
+                        optional_selection = self.get_input(values=['q', 'c'] + fields_numbers,
+                                                            help_text="c: continue, #: populate field")
+                        if optional_selection == 'c':
+                            break
+                        if optional_selection in fields_numbers:
+                            item_name = optional_fields[int(optional_selection) - 1]
+                            schema_item = schema['properties'][item_name].copy()
+                            schema_item['__name__'] = item_name
+                            self.get_input_for_schema_(schema, model, initialised=True, getitem=schema_item)
 
-        selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Continue?')
+            print("Obtained Data:\n")
+            model_unmapped = self.unmap_model(model)
+            self.print_colored_output(model_unmapped)
+
+            selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Continue?')
+
+        else:
+            selection = 'y'
+            model = None
 
         if selection == 'y':
             api_caller = self.get_api_caller(endpoint)
             print("Please wait while posting data ...\n")
 
             try:
-                api_response = api_caller(body=model)
+                api_response = api_caller(body=model) if model else api_caller()
             except Exception as e:
                 api_response = None
                 self.print_exception(e)
