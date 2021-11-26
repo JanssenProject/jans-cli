@@ -310,6 +310,13 @@ class JCA_CLI:
             raise ValueError(
                 self.colored_text("Unable to connect jans-auth server: {}".format(response.reason), error_color))
 
+    def guess_param_mapping(self, param_s):
+        word_list = re.sub( r"([A-Z])", r" \1", param_s).split()
+        word_list = [w.lower() for w in word_list]
+        param_name = '_'.join(word_list)
+        return param_name
+
+
     def make_menu(self):
 
         menu = Menu('Main Menu')
@@ -1186,7 +1193,8 @@ class JCA_CLI:
 
             try:
                 if url_param_val:
-                    payload = {url_param['name']: url_param_val, 'body': body}
+                    param_mapping = self.guess_param_mapping(url_param['name'])
+                    payload = {param_mapping: url_param_val, 'body': body}
                     api_response = api_caller(**payload)
                 else:
                     api_response = api_caller(body=body)
@@ -1201,6 +1209,7 @@ class JCA_CLI:
         selection = self.get_input(['b'])
         if selection == 'b':
             self.display_menu(endpoint.parent)
+
 
     def process_put(self, endpoint):
 
@@ -1262,7 +1271,7 @@ class JCA_CLI:
         if cur_model:
             end_point_param_val = None
             if end_point_param:
-                end_point_param_val = getattr(cur_model, end_point_param['name'])
+                end_point_param_val = getattr(cur_model, end_point_param['name'], None) or self.get_model_key_map(cur_model, end_point_param['name'])
 
             attr_name_list = []
             for attr_name in cur_model.attribute_map:
@@ -1318,6 +1327,7 @@ class JCA_CLI:
                         print("Please wait while posting data ...\n")
                         api_caller = self.get_api_caller(endpoint)
                         put_pname = self.get_url_param(endpoint.path)
+                        
                         try:
                             if put_pname:
                                 args_ = {'body': cur_model, put_pname: end_point_param_val}
@@ -1539,7 +1549,6 @@ class JCA_CLI:
         endpoint = Menu(name='', info=path)
         schema = self.get_scheme_for_endpoint(endpoint)
         model_name = schema['__schema_name__']
-
         model = getattr(swagger_client.models, model_name)
 
         if not data:
