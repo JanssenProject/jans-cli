@@ -371,15 +371,24 @@ class JCA_CLI:
             sys.stderr.write('\n')
 
     def print_exception(self, e):
-        print(self.colored_text("Error retreiving data", warning_color))
-        print('\u001b[38;5;196m')
-        if hasattr(e, 'reason'):
-            print(e.reason)
+        error_printed = False
         if hasattr(e, 'body'):
-            print(e.body)
-        if hasattr(e, 'args'):
-            print(', '.join(e.args))
-        print('\u001b[0m')
+            try:
+                jsdata = json.loads(e.body.decode())
+                print(self.colored_text(e.body.decode(), error_color))
+                error_printed = True
+            except:
+                pass
+        if not error_printed:
+            print(self.colored_text("Error retreiving data", warning_color))
+            print('\u001b[38;5;196m')
+            if hasattr(e, 'reason'):
+                print(e.reason)
+            if hasattr(e, 'body'):
+                print(e.body)
+            if hasattr(e, 'args'):
+                print(', '.join(e.args))
+            print('\u001b[0m')
 
     def colored_text(self, text, color=255):
         return u"\u001b[38;5;{}m{}\u001b[0m".format(color, text)
