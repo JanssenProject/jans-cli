@@ -400,6 +400,14 @@ class JCA_CLI:
     def colored_text(self, text, color=255):
         return u"\u001b[38;5;{}m{}\u001b[0m".format(color, text)
 
+
+    def guess_bool(self, val):
+        if val == '_false':
+            return False
+        if val == '_true':
+            return True
+
+
     def check_type(self, val, vtype):
         if vtype == 'string' and val:
             return str(val)
@@ -416,10 +424,9 @@ class JCA_CLI:
             except:
                 pass
         elif vtype == 'boolean':
-            if val == '_false':
-                return False
-            if val == '_true':
-                return True
+            guessed_val = self.guess_bool(val)
+            if not guessed_val is None:
+                return guessed_val
 
         error_text = "Please enter a(n) {} value".format(vtype)
         if vtype == 'boolean':
@@ -1158,11 +1165,13 @@ class JCA_CLI:
         url_param = self.get_endpiont_url_param(endpoint)
         if 'name' in url_param:
             url_param_val = self.get_input(text=url_param['name'], help_text='Entry to be patched')
-
         body = []
 
         while True:
             data = self.get_input_for_schema_(schema, model)
+            guessed_val = self.guess_bool(data.value)
+            if not guessed_val is None:
+                data.value = guessed_val
             if my_op_mode != 'scim' and not data.path.startswith('/'):
                 data.path = '/' + data.path
 
