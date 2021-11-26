@@ -1100,7 +1100,10 @@ class JCA_CLI:
 
     def process_delete(self, endpoint):
         url_param = self.get_endpiont_url_param(endpoint)
-        url_param_val = self.get_input(text=url_param['name'], help_text='Entry to be deleted')
+        if url_param:
+            url_param_val = self.get_input(text=url_param['name'], help_text='Entry to be deleted')
+        else:
+            url_param_val = ''
         selection = self.get_input(text="Are you sure want to delete {} ?".format(url_param_val),
                                    values=['b', 'y', 'n', 'q'])
         if selection in ('b', 'n'):
@@ -1111,7 +1114,7 @@ class JCA_CLI:
             api_response = '__result__'
 
             try:
-                api_response = api_caller(url_param_val)
+                api_response = api_caller(url_param_val) if url_param_val else api_caller()
             except Exception as e:
                 self.print_exception(e)
 
