@@ -1271,7 +1271,7 @@ class JCA_CLI:
             print_fields()
             changed_items = []
             selection_list = ['q', 'b', 'v', 's', 'l'] + item_numbers
-            help_text = 'q: quit, v: view, s: save, l: list fields #: update fieled'
+            help_text = 'q: quit, v: view, s: save, l: list fields #: update field'
 
             while True:
                 selection = self.get_input(values=selection_list, help_text=help_text)
