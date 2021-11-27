@@ -4538,12 +4538,16 @@ components:
         - applicationType
         - logout
         - includeClaimsInIdToken
+        - displayName
       properties:
         dn:
           type: string
         inum:
           description: XRI i-number. Client Identifier to uniquely identify the client.
           type: string
+        displayName:
+            type: string
+            description: Name of the user suitable for display to end-users
         clientSecret:
           type: string
           description: The client secret.  The client MAY omit the parameter if the client secret is an empty string.
