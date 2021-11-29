@@ -881,7 +881,7 @@ class JCA_CLI:
 
             schema_ = all_schema
 
-        for key_ in schema_['properties']:
+        for key_ in schema_.get('properties', []):
             if '$ref' in schema_['properties'][key_]:
                 schema_['properties'][key_] = self.get_schema_from_reference(schema_['properties'][key_]['$ref'])
             elif schema_['properties'][key_].get('type') == 'array' and '$ref' in schema_['properties'][key_]['items']:
