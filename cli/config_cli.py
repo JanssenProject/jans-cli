@@ -1227,27 +1227,11 @@ class JCA_CLI:
         initialised = False
         cur_model = None
         go_back = False
-        if 'x-cli-getdata' in endpoint.info:
-            for m in endpoint.parent:
-                if m.info['operationId'] == endpoint.info['x-cli-getdata']:
-                    while True:
-                        try:
-                            cur_model = self.process_get(m, return_value=True)
-                            break
-                        except ValueError as e:
-                            print(self.colored_text("Server returned no data", error_color))
-                            retry = self.get_input(values=['y', 'n'], text='Retry?')
-                            if retry == 'n':
-                                self.display_menu(endpoint.parent)
-                                break
-                    initialised = True
-                    get_endpoint = m
-                    break
 
-        else:
-            for m in endpoint.parent:
-                if m.method == 'get' and m.path.endswith('}'):
-                    while True:
+        if endpoint.info.get('x-cli-getdata') != '_file':
+            if 'x-cli-getdata' in endpoint.info and endpoint.info['x-cli-getdata'] != None:
+                for m in endpoint.parent:
+                    if m.info['operationId'] == endpoint.info['x-cli-getdata']:
                         while True:
                             try:
                                 cur_model = self.process_get(m, return_value=True)
@@ -1258,106 +1242,164 @@ class JCA_CLI:
                                 if retry == 'n':
                                     self.display_menu(endpoint.parent)
                                     break
+                        initialised = True
+                        get_endpoint = m
+                        break
 
-                        if not cur_model is False:
-                            break
+            else:
+                for m in endpoint.parent:
+                    if m.method == 'get' and m.path.endswith('}'):
+                        while True:
+                            while True:
+                                try:
+                                    cur_model = self.process_get(m, return_value=True)
+                                    break
+                                except ValueError as e:
+                                    print(self.colored_text("Server returned no data", error_color))
+                                    retry = self.get_input(values=['y', 'n'], text='Retry?')
+                                    if retry == 'n':
+                                        self.display_menu(endpoint.parent)
+                                        break
 
-                    initialised = True
-                    get_endpoint = m
-                    break
+                            if not cur_model is False:
+                                break
 
-        if not cur_model:
-            for m in endpoint.parent:
-                if m.method == 'get' and not m.path.endswith('}'):
-                    cur_model = self.process_get(m, return_value=True)
-                    get_endpoint = m
+                        initialised = True
+                        get_endpoint = m
+                        break
+
+            if not cur_model:
+                for m in endpoint.parent:
+                    if m.method == 'get' and not m.path.endswith('}'):
+                        cur_model = self.process_get(m, return_value=True)
+                        get_endpoint = m
+
 
         if not cur_model:
             cur_model = getattr(swagger_client.models, schema['__schema_name__'])
 
-        end_point_param = self.get_endpiont_url_param(get_endpoint)
+        end_point_param = self.get_endpiont_url_param(endpoint)
+
 
         if cur_model:
-            end_point_param_val = None
-            if end_point_param:
-                end_point_param_val = getattr(cur_model, end_point_param['name'], None) or self.get_model_key_map(cur_model, end_point_param['name'])
 
-            attr_name_list = []
-            for attr_name in cur_model.attribute_map:
-                if attr_name != 'dn':
-                    attr_name_list.append(cur_model.attribute_map[attr_name])
+            if endpoint.info.get('x-cli-getdata') == '_file':
 
-            attr_name_list.sort()
-            item_numbers = []
+                schema_desc = schema.get('description') or schema['__schema_name__']
+                text = 'Enter filename to load data for «{}»: '.format(schema_desc)
+                data_fn = input(self.colored_text(text, 244))
+                if data_fn == 'b':
+                    go_back = True
+                elif data_fn == 'q':
+                    sys.exit()
+                else:
+                    data_org = self.get_json_from_file(data_fn)
 
-            def print_fields():
-                print("Fields:")
-                for i, attr_name in enumerate(attr_name_list):
-                    print(str(i + 1).rjust(2), attr_name)
-                    item_numbers.append(str(i + 1))
-
-            print_fields()
-            changed_items = []
-            selection_list = ['q', 'b', 'v', 's', 'l'] + item_numbers
-            help_text = 'q: quit, v: view, s: save, l: list fields #: update field'
-
-            while True:
-                selection = self.get_input(values=selection_list, help_text=help_text)
-                if selection == 'v':
-                    self.pretty_print(self.unmap_model(cur_model))
-                elif selection == 'l':
-                    print_fields()
-                elif selection in item_numbers:
-                    item = attr_name_list[int(selection) - 1]
-                    item_unmapped = self.get_model_key_map(cur_model, item)
-
-                    if schema.get('properties',{}).get('keys', {}).get('properties', {}).get(item):
-                        schema_item = schema['properties']['keys']['properties'][item]
-                        schema = schema['properties']['keys']
+                data = {}
+                for k in data_org:
+                    if k in cur_model.attribute_map:
+                        mapped_key = cur_model.attribute_map[k]
+                        data[mapped_key] = data_org[k]
                     else:
-                        schema_item = schema['properties'][item]
+                        data[k] = data_org[k]
 
-                    schema_item['__name__'] = item
-                    self.get_input_for_schema_(schema, cur_model, initialised=initialised, getitem=schema_item)
-                    changed_items.append(item)
+                api_caller = self.get_api_caller(endpoint)
 
+                print("Please wait while posting data ...\n")
+
+                try:
+                    api_response = api_caller(body=data)
+                except Exception as e:
+                    api_response = None
+                    self.print_exception(e)
+
+                if api_response:
+                    api_response_unmapped = self.unmap_model(api_response)
+                    self.print_colored_output(api_response_unmapped)
+
+                selection = self.get_input(values=['q', 'b'])
                 if selection == 'b':
                     self.display_menu(endpoint.parent)
-                    break
-                elif selection == 's':
-                    print('Changes:')
-                    for ci in changed_items:
-                        model_key = self.get_model_key_map(cur_model, ci)
-                        str_val = str(getattr(cur_model, model_key))
-                        print(self.colored_text(ci, bold_color) + ':', self.colored_text(str_val, success_color))
 
-                    selection = self.get_input(values=['y', 'n'], text='Continue?')
-                    if selection == 'y':
-                        print("Please wait while posting data ...\n")
-                        api_caller = self.get_api_caller(endpoint)
-                        put_pname = self.get_url_param(endpoint.path)
-                        
-                        try:
-                            if put_pname:
-                                args_ = {'body': cur_model, put_pname: end_point_param_val}
-                                api_response = api_caller(**args_)
-                            else:
-                                api_response = api_caller(body=cur_model)
-                        except Exception as e:
-                            api_response = None
-                            self.print_exception(e)
 
-                        if api_response:
-                            api_response_unmapped = self.unmap_model(api_response)
-                            self.print_colored_output(api_response_unmapped)
-                            go_back = True
-                            break
-        if go_back:
-            selection = self.get_input(values=['q', 'b'])
-            if selection == 'b':
-                self.display_menu(endpoint.parent)
-        else:
-            self.get_input_for_schema_(schema, cur_model, initialised=initialised)
+            else:
+
+                end_point_param_val = None
+                if end_point_param:
+                    end_point_param_val = getattr(cur_model, end_point_param['name'], None) or self.get_model_key_map(cur_model, end_point_param['name'])
+
+                attr_name_list = []
+                for attr_name in cur_model.attribute_map:
+                    if attr_name != 'dn':
+                        attr_name_list.append(cur_model.attribute_map[attr_name])
+
+                attr_name_list.sort()
+                item_numbers = []
+
+                def print_fields():
+                    print("Fields:")
+                    for i, attr_name in enumerate(attr_name_list):
+                        print(str(i + 1).rjust(2), attr_name)
+                        item_numbers.append(str(i + 1))
+
+                print_fields()
+                changed_items = []
+                selection_list = ['q', 'b', 'v', 's', 'l'] + item_numbers
+                help_text = 'q: quit, v: view, s: save, l: list fields #: update field'
+
+                while True:
+                    selection = self.get_input(values=selection_list, help_text=help_text)
+                    if selection == 'v':
+                        self.pretty_print(self.unmap_model(cur_model))
+                    elif selection == 'l':
+                        print_fields()
+                    elif selection in item_numbers:
+                        item = attr_name_list[int(selection) - 1]
+                        item_unmapped = self.get_model_key_map(cur_model, item)
+                        schema_item = schema['properties'][item]
+                        schema_item['__name__'] = item
+                        self.get_input_for_schema_(schema, cur_model, initialised=initialised, getitem=schema_item)
+                        changed_items.append(item)
+
+                    if selection == 'b':
+                        self.display_menu(endpoint.parent)
+                        break
+                    elif selection == 's':
+                        print('Changes:')
+                        for ci in changed_items:
+                            model_key = self.get_model_key_map(cur_model, ci)
+                            str_val = str(getattr(cur_model, model_key))
+                            print(self.colored_text(ci, bold_color) + ':', self.colored_text(str_val, success_color))
+
+                        selection = self.get_input(values=['y', 'n'], text='Continue?')
+
+                        if selection == 'y':
+                            print("Please wait while posting data ...\n")
+                            api_caller = self.get_api_caller(endpoint)
+                            put_pname = self.get_url_param(endpoint.path)
+                            
+                            try:
+                                if put_pname:
+                                    args_ = {'body': cur_model, put_pname: end_point_param_val}
+                                    api_response = api_caller(**args_)
+                                else:
+                                    api_response = api_caller(body=cur_model)
+                            except Exception as e:
+                                api_response = None
+                                self.print_exception(e)
+
+                            if api_response:
+                                api_response_unmapped = self.unmap_model(api_response)
+                                self.print_colored_output(api_response_unmapped)
+                                go_back = True
+                                break
+
+                if go_back:
+                    selection = self.get_input(values=['q', 'b'])
+                    if selection == 'b':
+                        self.display_menu(endpoint.parent)
+                else:
+                    self.get_input_for_schema_(schema, cur_model, initialised=initialised)
 
     def display_menu(self, menu):
         clear()

@@ -1621,6 +1621,7 @@ paths:
       summary: Puts/replaces JWKS
       description: Puts/replaces JSON Web Keys (JWKS).
       operationId: put-config-jwks
+      x-cli-getdata: _file
       requestBody:
         content:
           application/json:
