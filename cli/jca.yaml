@@ -4950,6 +4950,8 @@ components:
         - id
         - type
         - iconUri
+        - name
+        - description
       properties:
         dn:
           type: string
