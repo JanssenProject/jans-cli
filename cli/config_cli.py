@@ -663,7 +663,8 @@ class JCA_CLI:
                     itype=param['schema']['type'],
                     default=param['schema'].get('default'),
                     enforce=enforce,
-                    help_text=help_text
+                    help_text=help_text,
+                    example=param.get('example')
                 )
 
         return parameters
